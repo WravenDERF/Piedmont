@@ -16,9 +16,11 @@ Add-Member -InputObject $MassDriver -MemberType 'ScriptMethod' -Name 'FujiSynaps
 
 
     Clear-Host
-    Write-Host -Object $ComputerName
-    Write-Host -Object $('Hello World!')
-    PAUSE
+    IF ($MassDriver.Debug) {Write-Host -Object $ComputerName}
+    IF ($MassDriver.Debug) {Write-Host -Object $ComputerName}
+    Invoke-Command -ComputerName $ComputerName -ScriptBlock {
+    
+    }
 
 }
 
