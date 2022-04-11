@@ -7,7 +7,21 @@ $MassDriver = [PSCustomObject]@{
 }
 
 
+Add-Member -InputObject $MassDriver -MemberType 'ScriptMethod' -Name 'FujiSynapseInstallAgentPROD' -Force -Value {
+
+
+    PARAM (
+        [Parameter()][string]$ComputerName
+    )
+
+    Write-Host -Object $ComputerName
+    PAUSE
+
+}
+
+
 Add-Member -InputObject $MassDriver -MemberType 'ScriptMethod' -Name 'FujiSynapseMenu' -Force -Value {
+
 
       #Display the Fuji Synapse menu.
       IF ($MassDriver.Debug) {PAUSE}
@@ -31,13 +45,15 @@ Add-Member -InputObject $MassDriver -MemberType 'ScriptMethod' -Name 'FujiSynaps
         Write-Host -Object $(' 8. Repair Fuji Synapse 5.7.220 Web Icon (TEST)')
         Write-Host -Object $(' 9. Uninstall Fuji Synapse 5.7.220 Web Icon (TEST)')
         Write-Host -Object $('==============================================================================')
-        $SelectionInput = Read-Host "Please make a selection"
-
+        $ActionInput = Read-Host "Please make a selection"
+        Write-Host -Object $('==============================================================================')
+        $TargetInput = Read-Host "Enter the PC to target(leave blank for local)"
+        IF ($TargetInput -eq $Null) {$TargetInput = HOSTNAME}
 
         #Perform task based off of the selection.
-        SWITCH ($SelectionInput) {
+        SWITCH ($ActionInput) {
           '0' {RETURN}
-          '1' {$Tools.DisplayMainMenu()}
+          '1' {$MassDriver.FujiSynapseInstallAgentPROD($TargetInput)}
           DEFAULT {. .\POWERSHELL\INFOSPARK.NAVI.PS1}
         }
       } UNTIL ($SelectionInput -eq '0')
