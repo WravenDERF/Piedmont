@@ -14,7 +14,10 @@ Add-Member -InputObject $MassDriver -MemberType 'ScriptMethod' -Name 'FujiSynaps
         [Parameter()][string]$ComputerName
     )
 
+
+    Clear-Host
     Write-Host -Object $ComputerName
+    Write-Host -Object $('Hello World!')
     PAUSE
 
 }
