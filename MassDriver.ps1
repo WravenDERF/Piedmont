@@ -87,9 +87,14 @@ Add-Member -InputObject $MassDriver -MemberType 'ScriptMethod' -Name 'FujiSynaps
 
     #The main code block that installs everything for Fuji Synapse Agent PROD.
     $InstallAgentPROD = {
-        Write-Host -Object $('Installing the Fuji Synapse 3D.')
-        Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList '/x {B6729277-10DA-4A2E-BABA-6B50002C5E57} /qb-' -Wait
-        
+        Write-Host -Object $('Installing the Fuji Synapse 3D component.')
+        Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList "/i ""C:\INSTALLS\$($MassDriver.ActiveSynapseName)\x86\InstallHelperSetup.msi"" ALLUSERS=1 /qb-" -Wait
+        Write-Host -Object $('Installing the Dynamic Web HTML5 component.')
+        Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList "/i ""C:\INSTALLS\$($MassDriver.ActiveSynapseName)\x86\DynamicWebTWAINHTML5Edition.msi"" ALLUSERS=1 /qb-" -Wait
+        Write-Host -Object $('Installing the Fuji Synapse Desktop Agent.')
+        Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList "/i ""C:\INSTALLS\$($MassDriver.ActiveSynapseName)\x86\SynapseWorkstationEx.msi"" CODEBASE=""http://farmcsyn.piedmonthospital.org/"" VERIFY_INSTALLATION=0 INSTALL_DESKTOP_AGENT=1 ALLUSERS=1 /qb-" -Wait
+        Write-Host -Object $('Adding the startup batch file.')
+        Start-Process -FilePath 'C:\Windows\system32\SCHTASKS.EXE' -ArgumentList '/CREATE /F /TN "Piedmont\LOGOUT-FUJISYNAPSE" /RU "SYSTEM" /RL HIGHEST /SC ONSTART /TR "C:\INSTALLS\Fuji Synapse 5.7.220\Help\Files\Fuji-Synapse-XML.bat"' -Wait
     }
 
 
@@ -100,12 +105,13 @@ Add-Member -InputObject $MassDriver -MemberType 'ScriptMethod' -Name 'FujiSynaps
         IF ($MassDriver.Debug) {Write-Host -Object $('The local hostname is: ' + $LocalHostName + '. The target that was passed is: '  + $ComputerName)}
         IF ($MassDriver.Debug) {Pause}
         Invoke-Command -ScriptBlock {Start-Process -FilePath 'C:\Windows\system32\ROBOCOPY.EXE' -ArgumentList """$($MassDriver.SourceRepository)\$($MassDriver.ActiveSynapseName)"" ""\\$ComputerName\C$\INSTALLS\$($MassDriver.ActiveSynapseName)"" /E /XD ""$($MassDriver.SourceRepository)\$($MassDriver.ActiveSynapseName)\Extras""" -Wait}
+        Invoke-Command -ScriptBlock $MassDriver.FujiSynapseUninstall($ComputerName)
         IF ($ComputerName -eq $LocalHostName) {
             #Running commands on local workstation.
-            Invoke-Command -ScriptBlock $UninstallEverything
+            Invoke-Command -ScriptBlock $InstallAgentPROD
         } ELSE {
             #Running commands on remote workstation.
-            Invoke-Command -ComputerName $ComputerName -ScriptBlock $UninstallEverything
+            Invoke-Command -ComputerName $ComputerName -ScriptBlock $InstallAgentPROD
         }
         IF ($MassDriver.Debug) {Pause}
     }
