@@ -7,6 +7,17 @@ $MassDriver = [PSCustomObject]@{
 }
 
 
+#Test code to make the computer talk to me.
+Invoke-Command -ComputerName $ComputerName -ScriptBlock {
+    Add-Type -AssemblyName System.speech
+    $speak = New-Object System.Speech.Synthesis.SpeechSynthesizer
+    $speak.GetInstalledVoices() | ForEach{$_.VoiceInfo}
+    $speak.SelectVoice('Microsoft Zira Desktop')
+    $speak.Rate = -1
+    $speak.Speak("This is New installer for Fuji Synapse!")
+}
+
+
 Add-Member -InputObject $MassDriver -MemberType 'ScriptMethod' -Name 'FujiSynapseUninstall' -Force -Value {
 
 
