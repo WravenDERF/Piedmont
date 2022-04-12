@@ -88,11 +88,11 @@ Add-Member -InputObject $MassDriver -MemberType 'ScriptMethod' -Name 'FujiSynaps
     #The main code block that installs everything for Fuji Synapse Agent PROD.
     $InstallAgentPROD = {
         Write-Host -Object $('Installing the Fuji Synapse 3D component.')
-        Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList "/i ""C:\INSTALLS\$($MassDriver.ActiveSynapseName)\x86\InstallHelperSetup.msi"" ALLUSERS=1 /qb-" -Wait
+        Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList "/i ""C:\INSTALLS\Fuji Synapse 5.7.220\x86\InstallHelperSetup.msi"" ALLUSERS=1 /qb-" -Wait
         Write-Host -Object $('Installing the Dynamic Web HTML5 component.')
-        Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList "/i ""C:\INSTALLS\$($MassDriver.ActiveSynapseName)\x86\DynamicWebTWAINHTML5Edition.msi"" ALLUSERS=1 /qb-" -Wait
+        Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList "/i ""C:\INSTALLS\Fuji Synapse 5.7.220\x86\DynamicWebTWAINHTML5Edition.msi"" ALLUSERS=1 /qb-" -Wait
         Write-Host -Object $('Installing the Fuji Synapse Desktop Agent.')
-        Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList "/i ""C:\INSTALLS\$($MassDriver.ActiveSynapseName)\x86\SynapseWorkstationEx.msi"" CODEBASE=""http://farmcsyn.piedmonthospital.org/"" VERIFY_INSTALLATION=0 INSTALL_DESKTOP_AGENT=1 ALLUSERS=1 /qb-" -Wait
+        Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList "/i ""C:\INSTALLS\Fuji Synapse 5.7.220\x86\SynapseWorkstationEx.msi"" CODEBASE=""http://farmcsyn.piedmonthospital.org/"" VERIFY_INSTALLATION=0 INSTALL_DESKTOP_AGENT=1 ALLUSERS=1 /qb-" -Wait
         Write-Host -Object $('Adding the startup batch file.')
         Start-Process -FilePath 'C:\Windows\system32\SCHTASKS.EXE' -ArgumentList '/CREATE /F /TN "Piedmont\LOGOUT-FUJISYNAPSE" /RU "SYSTEM" /RL HIGHEST /SC ONSTART /TR "C:\INSTALLS\Fuji Synapse 5.7.220\Help\Files\Fuji-Synapse-XML.bat"' -Wait
     }
