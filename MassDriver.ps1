@@ -7,7 +7,7 @@ $MassDriver = [PSCustomObject]@{
 }
 
 
-#Test code to make the computer talk to me.
+#Test code to make the computer talk to me!
 Invoke-Command -ScriptBlock {
     Add-Type -AssemblyName System.speech
     $speak = New-Object System.Speech.Synthesis.SpeechSynthesizer
