@@ -27,10 +27,16 @@ Add-Member -InputObject $MassDriver -MemberType 'ScriptMethod' -Name 'FujiSynaps
         Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList '/x {C21DF62B-3850-4977-8061-AD346FB14883} /qb-' -Wait
         #Uninstall the MPR Fusion component.
         Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList '/x {B6729277-10DA-4A2E-BABA-6B50002C5E57} /qb-' -Wait
-        
+        #Uninstall the Fuji Synapse Unknown Version.
+        Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList '/x {BFE00D46-C1CF-4754-A51E-A4731F967992} REMOVECONFIGURATION=1 REMOVEDATASOURCE=1 /qb-' -Wait
         #Uninstall the Fuji Synapse 4.4.200.
-        Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList '/x {C3FE4D19-8346-466A-B3EF-6A13867E8FDD} /qb-' -Wait
-        
+        Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList '/x {D2DEA580-C6B1-4A8D-820E-46E93059268B} REMOVECONFIGURATION=1 REMOVEDATASOURCE=1 /qb-' -Wait
+        #Uninstall the Fuji Synapse 4.4.210.
+        Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList '/x {F71DB8E8-D8DA-4814-9255-10C7C52BAA30} REMOVECONFIGURATION=1 REMOVEDATASOURCE=1 /qb-' -Wait
+        #Uninstall the Fuji Synapse 4.4.360.
+        Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList '/x {D5BF7D6D-152E-4FBF-B2EE-DA5262B700A7} REMOVECONFIGURATION=1 REMOVEDATASOURCE=1 /qb-' -Wait
+        #Uninstall the Fuji Synapse 4.4.375.
+        Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList '/x {BA934C23-8A49-46F5-ABED-A1E00727A97B} REMOVECONFIGURATION=1 REMOVEDATASOURCE=1 /qb-' -Wait
         #Uninstall the Fuji Synapse 5.5 Desktop Agent.
         Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList '/x {C3FE4D19-8346-466A-B3EF-6A13867E8FDD} /qb-' -Wait
         #Uninstall the Fuji Synapse 5.7.200 Desktop Agent.
@@ -48,8 +54,10 @@ Add-Member -InputObject $MassDriver -MemberType 'ScriptMethod' -Name 'FujiSynaps
         IF (Test-Path -Path "$Env:PUBLIC\Desktop\Synapse 5 Web.lnk") {Remove-Item -Path "$Env:PUBLIC\Desktop\Synapse 5 Web.lnk"}
         #Remove registry keys.
         IF (Test-Path -Path "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Fuji Synapse 5 Web") {Remove-Item -Path "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Fuji Synapse 5 Web"}
-        #Remove Scheduled Task for PS360 Logout.
+        #Remove Scheduled Task for Fuji Synapse.
         Start-Process -FilePath 'C:\Windows\system32\SCHTASKS.EXE' -ArgumentList /DELETE /F /TN "Piedmont\LOGOUT-FUJISYNAPSE" -Wait
+        Start-Process -FilePath 'C:\Windows\system32\SCHTASKS.EXE' -ArgumentList /DELETE /F /TN "Piedmont\UNINSTALL-SYNAPSE44" -Wait
+        Start-Process -FilePath 'C:\Windows\system32\SCHTASKS.EXE' -ArgumentList /DELETE /F /TN "Piedmont\SYSTEM-REBOOT" -Wait
     }
 
 }
@@ -67,7 +75,7 @@ Add-Member -InputObject $MassDriver -MemberType 'ScriptMethod' -Name 'FujiSynaps
     IF ($MassDriver.Debug) {Write-Host -Object $ComputerName}
     IF ($MassDriver.Debug) {Write-Host -Object $ComputerName}
     Invoke-Command -ComputerName $ComputerName -ScriptBlock {
-    
+        $MassDriver.FujiSynapseUninstall($ComputerName)
     }
 
 }
