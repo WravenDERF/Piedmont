@@ -21,47 +21,64 @@ Add-Member -InputObject $MassDriver -MemberType 'ScriptMethod' -Name 'FujiSynaps
     }
     
 
-
+    #Running commands on remote workstation.
     Invoke-Command -ComputerName $ComputerName -ScriptBlock {
         Write-Host -Object $('Exiting Fuji Desktop Agent.')
         IF (Get-Process -Name 'Fujifilm.Synapse.Agent.exe' -ErrorAction 'SilentlyContinue') {Stop-Process "Fujifilm.Synapse.Agent.exe" -Force}
+        IF ($MassDriver.Debug) {Pause}
         Write-Host -Object $('Uninstalling the HTML5 TWAIN Web component.')
         Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList '/x {7BF08D44-2176-4A7B-A8B7-8E4DC7424D5D} /qb-' -Wait
+        IF ($MassDriver.Debug) {Pause}
         Write-Host -Object $('Uninstalling the Installation Helper 1.3.1.0 component.')
         Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList '/x {C21DF62B-3850-4977-8061-AD346FB14883} /qb-' -Wait
+        IF ($MassDriver.Debug) {Pause}
         Write-Host -Object $('Uninstalling the MPR Fusion component.')
         Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList '/x {B6729277-10DA-4A2E-BABA-6B50002C5E57} /qb-' -Wait
-        Write-Host -Object $('Uninstalling the unknown Fuji Synapse version.')
+        IF ($MassDriver.Debug) {Pause}
+        Write-Host -Object $('Uninstalling unknown Fuji Synapse version.')
         Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList '/x {BFE00D46-C1CF-4754-A51E-A4731F967992} REMOVECONFIGURATION=1 REMOVEDATASOURCE=1 /qb-' -Wait
-        Write-Host -Object $('Uninstalling the Fuji Synapse 4.4.200.')
+        IF ($MassDriver.Debug) {Pause}
+        Write-Host -Object $('Uninstalling Fuji Synapse 4.4.200.')
         Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList '/x {D2DEA580-C6B1-4A8D-820E-46E93059268B} REMOVECONFIGURATION=1 REMOVEDATASOURCE=1 /qb-' -Wait
-        Write-Host -Object $('Uninstalling the Fuji Synapse 4.4.210.')
+        IF ($MassDriver.Debug) {Pause}
+        Write-Host -Object $('Uninstalling Fuji Synapse 4.4.210.')
         Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList '/x {F71DB8E8-D8DA-4814-9255-10C7C52BAA30} REMOVECONFIGURATION=1 REMOVEDATASOURCE=1 /qb-' -Wait
-        Write-Host -Object $('Uninstalling the Fuji Synapse 4.4.360.')
+        IF ($MassDriver.Debug) {Pause}
+        Write-Host -Object $('Uninstalling Fuji Synapse 4.4.360.')
         Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList '/x {D5BF7D6D-152E-4FBF-B2EE-DA5262B700A7} REMOVECONFIGURATION=1 REMOVEDATASOURCE=1 /qb-' -Wait
-        Write-Host -Object $('Uninstalling the Fuji Synapse 4.4.375.')
+        IF ($MassDriver.Debug) {Pause}
+        Write-Host -Object $('Uninstalling Fuji Synapse 4.4.375.')
         Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList '/x {BA934C23-8A49-46F5-ABED-A1E00727A97B} REMOVECONFIGURATION=1 REMOVEDATASOURCE=1 /qb-' -Wait
-        Write-Host -Object $('Uninstalling the Fuji Synapse 5.5 Desktop Agent.')
+        IF ($MassDriver.Debug) {Pause}
+        Write-Host -Object $('Uninstalling Fuji Synapse 5.5 Desktop Agent.')
         Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList '/x {C3FE4D19-8346-466A-B3EF-6A13867E8FDD} /qb-' -Wait
+        IF ($MassDriver.Debug) {Pause}
         Write-Host -Object $('Uninstalling Fuji Synapse 5.7.200 Desktop Agent.')
         Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList '/x {64D3590F-3BF8-4E61-994F-9AFB89EA6176} /qb-' -Wait
         Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList '/x {56839E35-532F-479D-8BB9-64D3546DF819} /qb-' -Wait
-        Write-Host -Object $('Uninstalling the Fuji Synapse 5.7.220 Desktop Agent.')
+        IF ($MassDriver.Debug) {Pause}
+        Write-Host -Object $('Uninstalling Fuji Synapse 5.7.220 Desktop Agent.')
         Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList '/x {E6EB995F-F572-4DB9-A61A-0C3E6D11F75F} /qb-' -Wait
+        IF ($MassDriver.Debug) {Pause}
         Write-Host -Object $('Removing the old documentation links.')
         IF (Test-Path -Path "$Env:PUBLIC\Desktop\Fuji Synapse 5 Training.lnk") {Remove-Item -Path "$Env:PUBLIC\Desktop\Fuji Synapse 5 Training.lnk"}
+        IF ($MassDriver.Debug) {Pause}
         Write-Host -Object $('Removing the Content Manager icon.')
         IF (Test-Path -Path "$Env:PUBLIC\Desktop\Content Manager.lnk") {Remove-Item -Path "$Env:PUBLIC\Desktop\Content Manager.lnk"}
+        IF ($MassDriver.Debug) {Pause}
         Write-Host -Object $('Removing old tools.')
         IF (Test-Path -Path "$Env:PUBLIC\Desktop\ScanKill.lnk") {Remove-Item -Path "$Env:PUBLIC\Desktop\ScanKill.lnk"}
+        IF ($MassDriver.Debug) {Pause}
         Write-Host -Object $('Removing the Fuji Synapse 5 Web link.')
         IF (Test-Path -Path "$Env:PUBLIC\Desktop\Synapse 5 Web.lnk") {Remove-Item -Path "$Env:PUBLIC\Desktop\Synapse 5 Web.lnk"}
+        IF ($MassDriver.Debug) {Pause}
         Write-Host -Object $('Removing Registry keys.')
         IF (Test-Path -Path "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Fuji Synapse 5 Web") {Remove-Item -Path "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Fuji Synapse 5 Web"}
+        IF ($MassDriver.Debug) {Pause}
         Write-Host -Object $('Removing any Scheduled Task for Fuji Synapse.')
-        Start-Process -FilePath 'C:\Windows\system32\SCHTASKS.EXE' -ArgumentList /DELETE /F /TN "Piedmont\LOGOUT-FUJISYNAPSE" -Wait
-        Start-Process -FilePath 'C:\Windows\system32\SCHTASKS.EXE' -ArgumentList /DELETE /F /TN "Piedmont\UNINSTALL-SYNAPSE44" -Wait
-        Start-Process -FilePath 'C:\Windows\system32\SCHTASKS.EXE' -ArgumentList /DELETE /F /TN "Piedmont\SYSTEM-REBOOT" -Wait
+        Start-Process -FilePath 'C:\Windows\system32\SCHTASKS.EXE' -ArgumentList '/DELETE /F /TN "Piedmont\LOGOUT-FUJISYNAPSE"' -Wait
+        Start-Process -FilePath 'C:\Windows\system32\SCHTASKS.EXE' -ArgumentList '/DELETE /F /TN "Piedmont\UNINSTALL-SYNAPSE44"' -Wait
+        Start-Process -FilePath 'C:\Windows\system32\SCHTASKS.EXE' -ArgumentList '/DELETE /F /TN "Piedmont\SYSTEM-REBOOT"' -Wait
         IF ($MassDriver.Debug) {PAUSE}
     }
 
