@@ -111,7 +111,8 @@ Add-Member -InputObject $MassDriver -MemberType 'ScriptMethod' -Name 'FujiSynaps
         $TargetInput = Read-Host "Enter the PC to target(leave blank for local)"
         IF ($TargetInput -eq '') {$TargetInput = HOSTNAME}
         IF ($MassDriver.Debug) {Write-Host -Object $TargetInput}
-
+        IF ($MassDriver.Debug) {PAUSE}
+        
         #Perform task based off of the selection.
         SWITCH ($ActionInput) {
           '0' {RETURN}
