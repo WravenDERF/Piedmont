@@ -63,7 +63,8 @@ Add-Member -InputObject $MassDriver -MemberType 'ScriptMethod' -Name 'FujiSynaps
         Clear-Host
         IF ($MassDriver.Debug) {Write-Host -Object $('Uninstalling apps for ' + $ComputerName)}
         IF ($MassDriver.Debug) {Pause}
-        IF ($ComputerName -eq HOSTNAME) {
+        $LocalHostName = HOSTNAME
+        IF ($ComputerName -eq $LocalHostName) {
             #Running commands on local workstation.
             Invoke-Command -ScriptBlock {$UninstallEverything}
         } ELSE {
