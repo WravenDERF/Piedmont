@@ -67,10 +67,13 @@ Add-Member -InputObject $MassDriver -MemberType 'ScriptMethod' -Name 'FujiSynaps
         IF ($ComputerName -eq $LocalHostName) {
             #Running commands on local workstation.
             Invoke-Command -ScriptBlock {$UninstallEverything}
+            IF ($MassDriver.Debug) {Write-Host -Object $('True')}
         } ELSE {
             #Running commands on remote workstation.
             Invoke-Command -ComputerName $ComputerName -ScriptBlock {$UninstallEverything}
+            IF ($MassDriver.Debug) {Write-Host -Object $('False')}
         }
+        IF ($MassDriver.Debug) {Pause}
     }
 }
 
