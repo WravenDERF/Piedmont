@@ -2,7 +2,8 @@ $MassDriver = [PSCustomObject]@{
     'Vendor' = 'infoSpark'
     'Name' = 'MassDriver'
     'Version' = 'Beta 2022.04.11'
-    'SynapseSource' = '\\PHCMS01\share_data\PHC\Imaging\FredTest\Fuji Synapse 5.7.220'
+    'SourceRepository' = [string]'\\PHCMS01\share_data\PHC\Imaging\FredTest'
+    'ActiveSynapseName' = [string]'Fuji Synapse 5.7.220'
     'Debug' = $true
     'MenuArray' = New-Object System.Collections.ArrayList
 }
@@ -98,7 +99,7 @@ Add-Member -InputObject $MassDriver -MemberType 'ScriptMethod' -Name 'FujiSynaps
         $LocalHostName = HOSTNAME
         IF ($MassDriver.Debug) {Write-Host -Object $('The local hostname is: ' + $LocalHostName + '. The target that was passed is: '  + $ComputerName)}
         IF ($MassDriver.Debug) {Pause}
-        Invoke-Command -ScriptBlock {Start-Process -FilePath 'C:\Windows\system32\ROBOCOPY.EXE' -ArgumentList """$($MassDriver.SynapseSource)"" ""\\$ComputerName\C$\INSTALLS\%APPNAME%"" /E /XD ""$($MassDriver.SynapseSource)\Extras""" -Wait}
+        Invoke-Command -ScriptBlock {Start-Process -FilePath 'C:\Windows\system32\ROBOCOPY.EXE' -ArgumentList """$($MassDriver.SourceRepository)\$($MassDriver.ActiveSynapseName)"" ""\\$ComputerName\C$\INSTALLS\$($MassDriver.ActiveSynapseName)"" /E /XD ""$($MassDriver.SourceRepository)\$($MassDriver.ActiveSynapseName)\Extras""" -Wait}
         IF ($ComputerName -eq $LocalHostName) {
             #Running commands on local workstation.
             Invoke-Command -ScriptBlock $UninstallEverything
