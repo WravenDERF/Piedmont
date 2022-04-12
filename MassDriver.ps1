@@ -16,8 +16,8 @@ Add-Member -InputObject $MassDriver -MemberType 'ScriptMethod' -Name 'FujiSynaps
 
 
     Clear-Host
-    IF ($MassDriver.Debug) {Write-Host -Object $ComputerName}
-    IF ($MassDriver.Debug) {Write-Host -Object $ComputerName}
+    IF ($MassDriver.Debug) {Write-Host -Object $('Uninstalling apps for ' + $ComputerName)}
+    IF ($MassDriver.Debug) {Pause}
     Invoke-Command -ComputerName $ComputerName -ScriptBlock {
         #Stop the Agent Desktop if it is running.
         IF (Get-Process -Name 'Fujifilm.Synapse.Agent.exe' -ErrorAction 'SilentlyContinue') {Stop-Process "Fujifilm.Synapse.Agent.exe" -Force}
@@ -58,6 +58,7 @@ Add-Member -InputObject $MassDriver -MemberType 'ScriptMethod' -Name 'FujiSynaps
         Start-Process -FilePath 'C:\Windows\system32\SCHTASKS.EXE' -ArgumentList /DELETE /F /TN "Piedmont\LOGOUT-FUJISYNAPSE" -Wait
         Start-Process -FilePath 'C:\Windows\system32\SCHTASKS.EXE' -ArgumentList /DELETE /F /TN "Piedmont\UNINSTALL-SYNAPSE44" -Wait
         Start-Process -FilePath 'C:\Windows\system32\SCHTASKS.EXE' -ArgumentList /DELETE /F /TN "Piedmont\SYSTEM-REBOOT" -Wait
+        IF ($MassDriver.Debug) {PAUSE}
     }
 
 }
@@ -91,7 +92,7 @@ Add-Member -InputObject $MassDriver -MemberType 'ScriptMethod' -Name 'FujiSynaps
         $speak.GetInstalledVoices() | ForEach{$_.VoiceInfo}
         $speak.SelectVoice('Microsoft Zira Desktop')
         $speak.Rate = -1
-        $speak.Speak("This is New installer for Fuji Synapse!")
+        $speak.Speak("This is the new installer for Fuji Synapse!")
     }
 
 
