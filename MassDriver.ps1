@@ -2,6 +2,7 @@ $MassDriver = [PSCustomObject]@{
     'Vendor' = 'infoSpark'
     'Name' = 'MassDriver'
     'Version' = 'Beta 2022.04.11'
+    'SynapseSource' = '\\PHCMS01\share_data\PHC\Imaging\FredTest\Fuji Synapse 5.7.220'
     'Debug' = $true
     'MenuArray' = New-Object System.Collections.ArrayList
 }
@@ -20,7 +21,7 @@ Add-Member -InputObject $MassDriver -MemberType 'ScriptMethod' -Name 'FujiSynaps
         IF (Get-Process -Name 'Fujifilm.Synapse.Agent.exe' -ErrorAction 'SilentlyContinue') {Stop-Process "Fujifilm.Synapse.Agent.exe" -Force}
         Write-Host -Object $('Uninstalling the HTML5 TWAIN Web component.')
         Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList '/x {7BF08D44-2176-4A7B-A8B7-8E4DC7424D5D} /qb-' -Wait
-        Write-Host -Object $('Uninstalling the Installation Helper 1.3.1.0 component.')
+        Write-Host -Object $('Uninstalling the Fuji Synapse 3D component.')
         Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList '/x {C21DF62B-3850-4977-8061-AD346FB14883} /qb-' -Wait
         Write-Host -Object $('Uninstalling the MPR Fusion component.')
         Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList '/x {B6729277-10DA-4A2E-BABA-6B50002C5E57} /qb-' -Wait
@@ -67,11 +68,9 @@ Add-Member -InputObject $MassDriver -MemberType 'ScriptMethod' -Name 'FujiSynaps
         IF ($ComputerName -eq $LocalHostName) {
             #Running commands on local workstation.
             Invoke-Command -ScriptBlock $UninstallEverything
-            IF ($MassDriver.Debug) {Write-Host -Object $('True')}
         } ELSE {
             #Running commands on remote workstation.
             Invoke-Command -ComputerName $ComputerName -ScriptBlock $UninstallEverything
-            IF ($MassDriver.Debug) {Write-Host -Object $('False')}
         }
         IF ($MassDriver.Debug) {Pause}
     }
@@ -85,14 +84,29 @@ Add-Member -InputObject $MassDriver -MemberType 'ScriptMethod' -Name 'FujiSynaps
     )
 
 
+    #The main code block that installs everything for Fuji Synapse Agent PROD.
+    $InstallAgentPROD = {
+        Write-Host -Object $('Installing the Fuji Synapse 3D.')
+        Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList '/x {B6729277-10DA-4A2E-BABA-6B50002C5E57} /qb-' -Wait
+        
+    }
+
+
     #Main sub for processing.
     Invoke-Command -ScriptBlock {
         Clear-Host
-        IF ($MassDriver.Debug) {Write-Host -Object $ComputerName}
-        IF ($MassDriver.Debug) {Write-Host -Object $ComputerName}
-        $MassDriver.FujiSynapseUninstall($ComputerName)
-        Invoke-Command -ComputerName $ComputerName -ScriptBlock {
+        $LocalHostName = HOSTNAME
+        IF ($MassDriver.Debug) {Write-Host -Object $('The local hostname is: ' + $LocalHostName + '. The target that was passed is: '  + $ComputerName)}
+        IF ($MassDriver.Debug) {Pause}
+        Invoke-Command -ScriptBlock {Start-Process -FilePath 'C:\Windows\system32\ROBOCOPY.EXE' -ArgumentList """$($MassDriver.SynapseSource)"" ""\\$ComputerName\C$\INSTALLS\%APPNAME%"" /E /XD ""$($MassDriver.SynapseSource)\Extras""" -Wait}
+        IF ($ComputerName -eq $LocalHostName) {
+            #Running commands on local workstation.
+            Invoke-Command -ScriptBlock $UninstallEverything
+        } ELSE {
+            #Running commands on remote workstation.
+            Invoke-Command -ComputerName $ComputerName -ScriptBlock $UninstallEverything
         }
+        IF ($MassDriver.Debug) {Pause}
     }
 }
 
