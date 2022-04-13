@@ -87,7 +87,7 @@ Add-Member -InputObject $MassDriver -MemberType 'ScriptMethod' -Name 'FujiSynaps
 
     #The main code block that installs everything for Fuji Synapse Agent PROD.
     $InstallAgentPROD = {
-        Write-Host -Object $('FredTest')
+        Write-Host -Object $('FredTest0')
         IF ($MassDriver.Debug) {Pause}
         Write-Host -Object $('Installing the Fuji Synapse 3D component.')
         Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList "/i ""C:\INSTALLS\Fuji Synapse 5.7.220\x86\InstallHelperSetup.msi"" ALLUSERS=1 /qb-" -Wait
@@ -108,9 +108,13 @@ Add-Member -InputObject $MassDriver -MemberType 'ScriptMethod' -Name 'FujiSynaps
         IF ($MassDriver.Debug) {Pause}
         Invoke-Command -ScriptBlock {Start-Process -FilePath 'C:\Windows\system32\ROBOCOPY.EXE' -ArgumentList """$($MassDriver.SourceRepository)\$($MassDriver.ActiveSynapseName)"" ""\\$ComputerName\C$\INSTALLS\$($MassDriver.ActiveSynapseName)"" /E /XD ""$($MassDriver.SourceRepository)\$($MassDriver.ActiveSynapseName)\Extras""" -Wait}
         Invoke-Command -ScriptBlock $MassDriver.FujiSynapseUninstall($ComputerName)
+        Write-Host -Object $('FredTest2')
+        IF ($MassDriver.Debug) {Pause}
         IF ($ComputerName -eq $LocalHostName) {
             #Running commands on local workstation.
             Invoke-Command -ScriptBlock $InstallAgentPROD
+            Write-Host -Object $('FredTest1')
+            IF ($MassDriver.Debug) {Pause}
         } ELSE {
             #Running commands on remote workstation.
             Invoke-Command -ComputerName $ComputerName -ScriptBlock $InstallAgentPROD
