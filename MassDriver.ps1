@@ -125,9 +125,7 @@ Add-Member -InputObject $MassDriver -MemberType 'ScriptMethod' -Name 'FujiSynaps
 
 
 Add-Member -InputObject $MassDriver -MemberType 'ScriptMethod' -Name 'FujiSynapseMenu' -Force -Value {
-
-
-    #Test code to make the computer talk to me!
+    <#Test code to make the computer talk to me!
     Invoke-Command -ScriptBlock {
         Add-Type -AssemblyName System.speech
         $speak = New-Object System.Speech.Synthesis.SpeechSynthesizer
@@ -136,7 +134,7 @@ Add-Member -InputObject $MassDriver -MemberType 'ScriptMethod' -Name 'FujiSynaps
         $speak.Rate = -1
         $speak.Speak("This is the new installer for Fuji Synapse!")
     }
-
+    #>
 
       #Display the Fuji Synapse menu.
       DO {
