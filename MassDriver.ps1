@@ -87,6 +87,8 @@ Add-Member -InputObject $MassDriver -MemberType 'ScriptMethod' -Name 'FujiSynaps
 
     #The main code block that installs everything for Fuji Synapse Agent PROD.
     $InstallAgentPROD = {
+        Write-Host -Object $('FredTest')
+        IF ($MassDriver.Debug) {Pause}
         Write-Host -Object $('Installing the Fuji Synapse 3D component.')
         Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList "/i ""C:\INSTALLS\Fuji Synapse 5.7.220\x86\InstallHelperSetup.msi"" ALLUSERS=1 /qb-" -Wait
         Write-Host -Object $('Installing the Dynamic Web HTML5 component.')
