@@ -318,7 +318,7 @@ Add-Member -InputObject $MassDriver -MemberType 'ScriptMethod' -Name 'FujiSynaps
 
 
 #Write the main titlebar.
-Invoke-Command -ScriptBlock {
+#Invoke-Command -ScriptBlock {
     Clear-Host
     Write-Host -Object $('= Fuji Synapse ===============================================================')
     Write-Host -Object $(' 1. Install Fuji Synapse 5.7.220 Desktop Agent (PROD)')
@@ -344,4 +344,4 @@ Invoke-Command -ScriptBlock {
         '6' {$MassDriver.FujiSynapseUninstall($TargetInput)}
         DEFAULT {RETURN}
     }
-}
+#}
