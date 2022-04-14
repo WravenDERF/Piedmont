@@ -1,4 +1,4 @@
-﻿$MassDriver = [PSCustomObject]@{
+$MassDriver = [PSCustomObject]@{
     'Vendor' = [string]'Fuji'
     'Name' = [string]'Synapse'
     'Version' = [string]'5.7.220'
