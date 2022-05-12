@@ -2,8 +2,9 @@ $FujiCDUploader = [PSCustomObject]@{
     'Vendor' = [string]'Fuji'
     'Name' = [string]'CD Uploader'
     'Version' = [string]'5.7.220'
-    'NetworkSource' = [string]'\\PHCMS01\share_data\PHC\Imaging\FredTest'
-    'LocalSource' = [string]'C:\INSTALLS'
+    'NetworkPackage' = [string]'\\PHCMS01\Share_Data\PHC\Imaging\Applications\FUJICDUPLOADER57.ZIP'
+    'LocalPackage' = [string]'C:\INSTALLS\Packages\FUJICDUPLOADER57.ZIP'
+    'LocalSource' = [string]'C:\INSTALLS\Fuji CD Uploader 5.7.220'
     'Debug' = [bool]$false
     'MenuArray' = New-Object System.Collections.ArrayList
 }
@@ -14,13 +15,14 @@ $FujiCDUploader = [PSCustomObject]@{
 Add-Member -InputObject $FujiCDUploader -MemberType 'ScriptMethod' -Name 'Copy' -Force -Value {
     #These are the parameters needed.
     PARAM (
-        [Parameter(Mandatory=$True)][string]$ComputerName
+        [Parameter(Mandatory=$True)][string]$ComputerName,
     )
     
-    #Copy source files to the destination.
-    [string]$NetworkSourceFiles = "$($MassDriver.NetworkSource)\$($MassDriver.Vendor) $($MassDriver.Name) $($MassDriver.Version)"
-    [string]$DestinationSourceFiles = "\\$ComputerName\C$\INSTALLS\$($MassDriver.Vendor) $($MassDriver.Name) $($MassDriver.Version)"
-    Invoke-Command -ScriptBlock {Start-Process -FilePath 'C:\Windows\system32\ROBOCOPY.EXE' -ArgumentList """$NetworkSourceFiles"" ""$DestinationSourceFiles"" /E /XD ""$DestinationSourceFiles\Extras""" -Wait}
+    Write-Host -Object $('Copying Package to Target Computer')
+    Start-BitsTransfer -Source $($FujiCDUploader.NetworkPackage) -Destination "\\$ComputerName\C$\Installs\Packages" -Asynchronous
+    
+    Write-Host -Object $('Extracting Package to Source')
+    Invoke-Command -ScriptBlock {Expand-Archive -LiteralPath $($FujiCDUploader.NetworkPackage) -DestinationPath $($FujiCDUploader.LocalSource)}
 }
 
 
