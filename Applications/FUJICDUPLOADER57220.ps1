@@ -6,7 +6,7 @@ $FujiCDUploader = [PSCustomObject]@{
     'LocalPackage' = [string]'C:\INSTALLS\Packages\FUJICDUPLOADER57.ZIP'
     'LocalSource' = [string]'C:\INSTALLS\Fuji CD Uploader 5.7.220'
     'Debug' = [bool]$false
-    'MenuArray' = New-Object System.Collections.ArrayList
+    'TargetList' = New-Object System.Collections.ArrayList
 }
 
 
@@ -15,14 +15,19 @@ $FujiCDUploader = [PSCustomObject]@{
 Add-Member -InputObject $FujiCDUploader -MemberType 'ScriptMethod' -Name 'Copy' -Force -Value {
     #These are the parameters needed.
     PARAM (
-        [Parameter(Mandatory=$True)][string]$ComputerName,
+        [Parameter(Mandatory=$True)][string]$ComputerName = 'OISCV10Z'
     )
     
+    Write-Host -Object $('Creating Folder for Packages')
+    IF ($ComputerName -eq $ENV:COMPUTERNAME) {$TargetName = '.'} ELSE {$TargetName = $ComputerName}
+    Invoke-Command -ComputerName $TargetName -ScriptBlock {IF (-Not (Test-Path -Path "C:\INSTALLS\Packages")) {New-Item -ItemType 'Directory' -Path "C:\INSTALLS\Packages" -Force}}
+
     Write-Host -Object $('Copying Package to Target Computer')
-    Start-BitsTransfer -Source $($FujiCDUploader.NetworkPackage) -Destination "\\$ComputerName\C$\Installs\Packages" -Asynchronous
+    Start-BitsTransfer -Source $($FujiCDUploader.NetworkPackage) -Destination "\\$ComputerName\C$\Installs\Packages"
     
     Write-Host -Object $('Extracting Package to Source')
-    Invoke-Command -ScriptBlock {Expand-Archive -LiteralPath $($FujiCDUploader.NetworkPackage) -DestinationPath $($FujiCDUploader.LocalSource)}
+    IF ($ComputerName -eq $ENV:COMPUTERNAME) {$TargetName = '.'} ELSE {$TargetName = $ComputerName}
+    Invoke-Command -ComputerName $TargetName -ScriptBlock {Expand-Archive -Path $Using:FujiCDUploader.LocalPackage -DestinationPath $Using:FujiCDUploader.LocalSource -Force}
 }
 
 
@@ -43,54 +48,44 @@ Add-Member -InputObject $FujiCDUploader -MemberType 'ScriptMethod' -Name 'Instal
                 )
                 
                 #Install the main application.
+                Write-Host -Object $('Installing application')
                 Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList "/i ""C:\INSTALLS\Fuji Synapse 5.7.220\x86\CDImportInstaller.msi"" /qb-" -Wait
-                #Copy the correct campus data.
+
+                Write-Host -Object $('Copying Campus Settings')
                 Copy-Item -Path "C:\INSTALLS\Fuji Synapse 5.7.220\Help\Settings\$Build\CDImport.ini" -Destination "C:\Users\Public\Desktop" -Force
+
                 #change Add/remove Programs to match the campus.
+                Write-Host -Object $('Change Add/remove Programs to match the campus')
                 New-ItemProperty -Path "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{D7FCFDCF-CFB8-4320-B30E-6599931A1CC1}" -Name "DisplayName" -PropertyType 'String' -Value "Synapse CDImport ($Build)" -Force
         }
 
         #Main sub for processing.
         Invoke-Command -ScriptBlock {
                 Clear-Host
-                $LocalHostName = HOSTNAME
-                IF ($FujiCDUploader.Debug) {Write-Host -Object $('The local hostname is: ' + $LocalHostName + '. The target that was passed is: '  + $ComputerName)}
+
+                IF ($FujiCDUploader.Debug) {Write-Host -Object $('The local hostname is: ' + $ENV:COMPUTERNAME + '. The target that was passed is: '  + $ComputerName)}
                 IF ($FujiCDUploader.Debug) {Pause}
                 
                 #Check if a list was passed.
                 IF (Test-Path -Path $ComputerName) {
                         IF ($FujiCDUploader.Debug) {Write-Host -Object $("TargetInput:$ComputerName - This is a list.") -ForegroundColor Magenta}
                         IF ($FujiCDUploader.Debug) {PAUSE}
-                        
-                        #Iterate through list and hit each name.
-                        $FileContents = Get-Content -Path $TargetInput
-                        FOREACH ($TargetPC in $FileContents) {
-                                #Check if local computer.
-                                IF ($ComputerName -eq $LocalHostName) {
-                                    #Running commands on local workstation.
-                                    Invoke-Command -ScriptBlock {$FujiCDUploader.Uninstall($TargetInput)}
-                                    Invoke-Command -ScriptBlock $Install -ArgumentList $Build
-                                } ELSE {
-                                    #Running commands on remote workstation.
-                                    Invoke-Command -ComputerName $ComputerName -ScriptBlock {$FujiCDUploader.Uninstall($TargetInput)}
-                                    Invoke-Command -ComputerName $ComputerName -ScriptBlock $Install -ArgumentList $Build
-                                }
-                        }
+                        $FujiCDUploader.TargetList = Get-Content -Path $ComputerName
                 } ELSE {
                         IF ($FujiCDUploader.Debug) {Write-Host -Object $("TargetInput:$ComputerName - This is a single computer.") -ForegroundColor Magenta}
                         IF ($FujiCDUploader.Debug) {PAUSE}
-                        
-                        #Check if local computer.
-                        IF ($ComputerName -eq $LocalHostName) {
-                            #Running commands on local workstation.
-                            Invoke-Command -ScriptBlock {$FujiCDUploader.Uninstall($TargetInput)}
-                            Invoke-Command -ScriptBlock $Install -ArgumentList $Build
-                        } ELSE {
-                            #Running commands on remote workstation.
-                            Invoke-Command -ComputerName $ComputerName -ScriptBlock {$FujiCDUploader.Uninstall($TargetInput)}
-                            Invoke-Command -ComputerName $ComputerName -ScriptBlock $Install -ArgumentList $Build
-                        }
+                        $($FujiCDUploader.TargetList).Add($ComputerName)
                 }
+
+                #Iterate through list and hit each name.
+                FOREACH ($TargetPC in $($FujiCDUploader.TargetList)) {
+
+                    Invoke-Command -ScriptBlock {$FujiCDUploader.Copy($TargetPC)}
+                    Invoke-Command -ScriptBlock {$FujiCDUploader.Uninstall($TargetPC)}
+                    IF ($ComputerName -eq $ENV:COMPUTERNAME) {$TargetName = '.'} ELSE {$TargetName = $ComputerName}
+                    Invoke-Command -ComputerName $TargetName -ScriptBlock $Install -ArgumentList $Build
+                }
+
                 IF ($FujiCDUploader.Debug) {Write-Host -Object $('FujiCDUploader.Install has completed.')}
                 IF ($FujiCDUploader.Debug) {Pause}
         }
@@ -102,8 +97,7 @@ Add-Member -InputObject $FujiCDUploader -MemberType 'ScriptMethod' -Name 'Instal
 Add-Member -InputObject $FujiCDUploader -MemberType 'ScriptMethod' -Name 'Uninstall' -Force -Value {
         #These are the parameters needed.
         PARAM (
-                [Parameter(Mandatory=$True)][string]$ComputerName,
-                [Parameter(Mandatory=$True)][string]$Build
+                [Parameter(Mandatory=$True)][string]$ComputerName
         )
 
         #The main code block that uninstalls everything.
@@ -132,41 +126,30 @@ Add-Member -InputObject $FujiCDUploader -MemberType 'ScriptMethod' -Name 'Uninst
         #Main sub for processing.
         Invoke-Command -ScriptBlock {
                 Clear-Host
-                $LocalHostName = HOSTNAME
-                IF ($FujiCDUploader.Debug) {Write-Host -Object $('The local hostname is: ' + $LocalHostName + '. The target that was passed is: '  + $ComputerName)}
+
+                IF ($FujiCDUploader.Debug) {Write-Host -Object $('The local hostname is: ' + $ENV:COMPUTERNAME + '. The target that was passed is: '  + $ComputerName)}
                 IF ($FujiCDUploader.Debug) {Pause}
                 
                 #Check if a list was passed.
                 IF (Test-Path -Path $ComputerName) {
                         IF ($FujiCDUploader.Debug) {Write-Host -Object $("TargetInput:$ComputerName - This is a list.") -ForegroundColor Magenta}
                         IF ($FujiCDUploader.Debug) {PAUSE}
-                        
-                        #Iterate through list and hit each name.
-                        $FileContents = Get-Content -Path $TargetInput
-                        FOREACH ($TargetPC in $FileContents) {
-                                #Check if local computer.
-                                IF ($ComputerName -eq $LocalHostName) {
-                                    #Running commands on local workstation.
-                                    Invoke-Command -ScriptBlock $Install -ArgumentList $Build
-                                } ELSE {
-                                    #Running commands on remote workstation.
-                                    Invoke-Command -ComputerName $ComputerName -ScriptBlock $Install -ArgumentList $Build
-                                }
-                        }
+                        $FujiCDUploader.TargetList = Get-Content -Path $ComputerName
                 } ELSE {
                         IF ($FujiCDUploader.Debug) {Write-Host -Object $("TargetInput:$ComputerName - This is a single computer.") -ForegroundColor Magenta}
                         IF ($FujiCDUploader.Debug) {PAUSE}
-                        
-                        #Check if local computer.
-                        IF ($ComputerName -eq $LocalHostName) {
-                            #Running commands on local workstation.
-                            Invoke-Command -ScriptBlock $Install -ArgumentList $Build
-                        } ELSE {
-                            #Running commands on remote workstation.
-                            Invoke-Command -ComputerName $ComputerName -ScriptBlock $Install -ArgumentList $Build
-                        }
+                        $($FujiCDUploader.TargetList).Add($ComputerName)
                 }
-                IF ($FujiCDUploader.Debug) {Write-Host -Object $('FujiCDUploader.Uninstall has completed.')}  
+
+                #Iterate through list and hit each name.
+                FOREACH ($TargetPC in $($FujiCDUploader.TargetList)) {
+
+                    Invoke-Command -ScriptBlock {$FujiCDUploader.Copy($TargetPC)}
+                    IF ($ComputerName -eq $ENV:COMPUTERNAME) {$TargetName = '.'} ELSE {$TargetName = $ComputerName}
+                    Invoke-Command -ComputerName $TargetName -ScriptBlock $Uninstall
+                }
+
+                IF ($FujiCDUploader.Debug) {Write-Host -Object $('FujiCDUploader.Uninstall has completed.')}
                 IF ($FujiCDUploader.Debug) {Pause}
         }
 }
