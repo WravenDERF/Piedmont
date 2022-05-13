@@ -5,7 +5,7 @@ $FujiCDUploader = [PSCustomObject]@{
     'NetworkPackage' = [string]'\\PHCMS01\Share_Data\PHC\Imaging\Applications\FUJICDUPLOADER57.ZIP'
     'LocalPackage' = [string]'C:\INSTALLS\Packages\FUJICDUPLOADER57.ZIP'
     'LocalSource' = [string]'C:\INSTALLS\Fuji CD Uploader 5.7.220'
-    'Debug' = [bool]$false
+    'Debug' = [bool]$True
     'TargetList' = New-Object System.Collections.ArrayList
 }
 
@@ -15,7 +15,7 @@ $FujiCDUploader = [PSCustomObject]@{
 Add-Member -InputObject $FujiCDUploader -MemberType 'ScriptMethod' -Name 'Copy' -Force -Value {
     #These are the parameters needed.
     PARAM (
-        [Parameter(Mandatory=$True)][string]$ComputerName = 'OISCV10Z'
+        [Parameter(Mandatory=$True)][string]$ComputerName
     )
     
     Write-Host -Object $('Creating Folder for Packages')
@@ -49,7 +49,7 @@ Add-Member -InputObject $FujiCDUploader -MemberType 'ScriptMethod' -Name 'Instal
                 
                 #Install the main application.
                 Write-Host -Object $('Installing application')
-                Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList "/i ""C:\INSTALLS\Fuji Synapse 5.7.220\x86\CDImportInstaller.msi"" /qb-" -Wait
+                Start-Process -FilePath 'C:\Windows\system32\MSIEXEC.EXE' -ArgumentList "/i ""C:\INSTALLS\Fuji CD Uploader 5.7.220\x86\CDImportInstaller.msi"" /qb-" -Wait
 
                 Write-Host -Object $('Copying Campus Settings')
                 Copy-Item -Path "C:\INSTALLS\Fuji Synapse 5.7.220\Help\Settings\$Build\CDImport.ini" -Destination "C:\Users\Public\Desktop" -Force
@@ -74,7 +74,7 @@ Add-Member -InputObject $FujiCDUploader -MemberType 'ScriptMethod' -Name 'Instal
                 } ELSE {
                         IF ($FujiCDUploader.Debug) {Write-Host -Object $("TargetInput:$ComputerName - This is a single computer.") -ForegroundColor Magenta}
                         IF ($FujiCDUploader.Debug) {PAUSE}
-                        $($FujiCDUploader.TargetList).Add($ComputerName)
+                        $FujiCDUploader.TargetList.Add($ComputerName)
                 }
 
                 #Iterate through list and hit each name.
@@ -87,7 +87,7 @@ Add-Member -InputObject $FujiCDUploader -MemberType 'ScriptMethod' -Name 'Instal
                 }
 
                 IF ($FujiCDUploader.Debug) {Write-Host -Object $('FujiCDUploader.Install has completed.')}
-                IF ($FujiCDUploader.Debug) {Pause}
+                IF ($FujiCDUploader.Debug) {PAUSE}
         }
 }
 
@@ -102,10 +102,6 @@ Add-Member -InputObject $FujiCDUploader -MemberType 'ScriptMethod' -Name 'Uninst
 
         #The main code block that uninstalls everything.
         $Uninstall = {
-                #These are the parameters needed.
-                PARAM (
-                        [Parameter(Mandatory=$True)][string]$Build
-                )
                 
                 Write-Host -Object $('Exiting Fuji CD Burner')
                 IF (Get-Process -Name 'CDImport.exe' -ErrorAction 'SilentlyContinue') {Stop-Process "CDImport.exe" -Force}
@@ -138,8 +134,13 @@ Add-Member -InputObject $FujiCDUploader -MemberType 'ScriptMethod' -Name 'Uninst
                 } ELSE {
                         IF ($FujiCDUploader.Debug) {Write-Host -Object $("TargetInput:$ComputerName - This is a single computer.") -ForegroundColor Magenta}
                         IF ($FujiCDUploader.Debug) {PAUSE}
-                        $($FujiCDUploader.TargetList).Add($ComputerName)
+                        #$ComputerName = 'OISCV10Z'
+                        $FujiCDUploader.TargetList.Add($ComputerName)
                 }
+                IF ($FujiCDUploader.Debug) {Write-Host -Object $($FujiCDUploader.TargetList).Count -ForegroundColor Magenta}
+                IF ($FujiCDUploader.Debug) {PAUSE}
+
+
 
                 #Iterate through list and hit each name.
                 FOREACH ($TargetPC in $($FujiCDUploader.TargetList)) {
@@ -160,21 +161,21 @@ Add-Member -InputObject $FujiCDUploader -MemberType 'ScriptMethod' -Name 'Uninst
 #Write the main titlebar.
 Clear-Host
 Write-Host -Object $('= Install Fuji CD Uploader 5.7.220 ===========================================')
-Write-Host -Object $(' 1. PAH                           2. PAR'
-Write-Host -Object $(' 3. PCH                           4. PCM'
-Write-Host -Object $(' 5. PCN                           6. PEH'
-Write-Host -Object $(' 7. PFH                           8. PHH'
-Write-Host -Object $(' 9. PMH                          10. PMM'
-Write-Host -Object $('11. PNH                          12. PNTH'
-Write-Host -Object $('13. POA                          14. PPG'
-Write-Host -Object $('15. PRH                          16. PWH'
+Write-Host -Object $(' 1. PAH                           2. PAR')
+Write-Host -Object $(' 3. PCH                           4. PCM')
+Write-Host -Object $(' 5. PCN                           6. PEH')
+Write-Host -Object $(' 7. PFH                           8. PHH')
+Write-Host -Object $(' 9. PMH                          10. PMM')
+Write-Host -Object $('11. PNH                          12. PNTH')
+Write-Host -Object $('13. POA                          14. PPG')
+Write-Host -Object $('15. PRH                          16. PWH')
 Write-Host -Object $('==============================================================================')
 Write-Host -Object $('20. Uninstall Fuji CD Uploader 5.7.220')
 Write-Host -Object $('==============================================================================')
 $ActionInput = Read-Host "Please make a selection"
 Write-Host -Object $('==============================================================================')
 $TargetInput = Read-Host "Enter the PC to target(leave blank for local)"
-IF ($TargetInput -eq '') {$TargetInput = HOSTNAME}
+IF ($TargetInput -eq '') {$TargetInput = $ENV:COMPUTERNAME}
 IF ($FujiCDUploader.Debug) {Write-Host -Object $TargetInput}
 IF ($FujiCDUploader.Debug) {PAUSE}
 
