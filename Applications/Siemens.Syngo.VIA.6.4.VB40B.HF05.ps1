@@ -8,15 +8,7 @@ $NetworkFile = '\\PHCMS01\Share_Data\PHC\Imaging\FredTest\Siemens.Syngo.VIA.6.4.
 $LocalFile = 'C:\INSTALLS\Packages\Siemens.Syngo.VIA.6.4.VB40B.HF05.zip'
 $LocalFolder = 'C:\INSTALLS\Siemens Syngo.VIA 6.4.VB40B_HF05'
 $ExecuteMSI = 'C:\Windows\system32\MSIEXEC.EXE'
-
-
-$Computer = [PSCustomObject]@{
-    'Index' = [string]$Null
-    'Hostname' = [string]$Null
-    'Ping' = [string]$Null
-    'Exist' = [bool]$False
-
-}
+$ComputerList = New-Object System.Collections.ArrayList
 
 $Copy = {
     IF ($Row -eq $ENV:COMPUTERNAME) {$TargetName = '.'} ELSE {$TargetName = $Row}
@@ -61,20 +53,17 @@ $Install = {
     #Installing...
     Invoke-Command -ComputerName $Row -ScriptBlock {
         Invoke-Command -ScriptBlock {Expand-Archive -Path $Using:LocalFile -DestinationPath $Using:LocalFolder -Force}
+
         Start-Process -FilePath $Using:ExecuteMSI -ArgumentList "/i ""$Using:LocalFolder\Bootstrapper_syngo.via@phcma809.piedmonthospital.org.msi"" /qb-" -WindowStyle 'Hidden' -Wait
         Start-Process -FilePath $Using:ExecuteMSI -ArgumentList "/i ""$Using:LocalFolder\syngo.via_Client_syngo.via.msi"" /qb-" -WindowStyle 'Hidden' -Wait
-    } -AsJob
 
-
-    #Repairing Settings...
-    Invoke-Command -ComputerName $Row -ScriptBlock {
         Copy-Item -Path "$Using:LocalFolder\Settings\ClientDeploymentContext.xml" -Destination "$Env:PROGRAMDATA\Siemens\syngo\DeploymentContexts" -Force
         Copy-Item -Path "$Using:LocalFolder\Desktop\Piedmont Technologist Teaching Aide.lnk" -Destination "$Env:PUBLIC\Desktop" -Force
 
         IF (Test-Path -Path "$Env:PUBLIC\Desktop\syngo.via - Server Selection.lnk") {Remove-Item -Path "$Env:PUBLIC\Desktop\syngo.via - Server Selection.lnk" -Force}
         IF (Test-Path -Path "$Env:PUBLIC\Desktop\syngo.via Client.lnk") {Remove-Item -Path "$Env:PUBLIC\Desktop\syngo.via Client.lnk" -Force}
         IF (Test-Path -Path "$Env:PUBLIC\Desktop\Siemens Syngo.VIA Training.lnk") {Remove-Item -Path "$Env:PUBLIC\Desktop\Siemens Syngo.VIA Training.lnk" -Force}
-    } -AsJob
+    }
 
 }
 
@@ -140,6 +129,16 @@ $Verify = {
 }
 
 FOREACH ($Row in $Workbook) {
+
+    $Computer = [PSCustomObject]@{
+        'Index' = $Index
+        'Hostname' = $Row
+        'Ping' = [string]$Null
+        'Exist' = [bool]$False
+
+    }
+
+
     $Computer.Index = $Index
     $Computer.Hostname = $Row
 
@@ -149,9 +148,15 @@ FOREACH ($Row in $Workbook) {
         #Invoke-Command -ScriptBlock $Uninstall
         #IF (Test-Path -Path 'C:\ProgramData\Microsoft\Windows\Start Menu\syngo.via') {$Computer.StillExist = $True}
         #IF (Test-Path -Path "\\$Row\c$\INSTALLS\Packages\Siemens.Syngo.VIA.6.4.VB40B.HF05.zip") {$Computer.Exist = $True}
-        Invoke-Command -ScriptBlock $Install
-        #IF (Test-Path -Path "\\$Row\c$\Users\Public\Desktop\syngo.via - Single Sign On.lnk") {$Computer.Exist = $True}
+        #Invoke-Command -ScriptBlock $Install
+        IF (Test-Path -Path "\\$Row\c$\Users\Public\Desktop\syngo.via - Single Sign On.lnk") {$Computer.Exist = $True}
         
+        $BatchFile = '\\PHCMS01\Share_Data\PHC\Imaging\FredTest\Siemens Syngo.VIA 6.4.VB40B_HF05\Automated\Automated.bat'
+        #IF (-Not (Test-Path -Path "\\$Row\c$\Users\Public\Desktop\syngo.via - Single Sign On.lnk")) {
+        #    $Computer.Exist = $False
+        #    Start-Process -FilePath $BatchFile -ArgumentList "BATCH 1 $Row"
+        #}
+
     } ELSE {
         $Computer.Ping = 'No'
 
